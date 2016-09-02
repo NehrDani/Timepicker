@@ -1,3 +1,46 @@
 .timepicker, .timepicker * {
   box-sizing: border-box;
 }
+
+.timepicker {
+  position: relative;
+  z-index: 10;
+  padding: 10px;
+  color: #444;
+  font-size: 14px;
+  width: 240px;
+}
+
+.timepicker table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+
+.timepicker td {
+  padding: 0;
+  margin: 0;
+  text-align: center;
+}
+
+.timepicker-btn {
+  border: none;
+  outline: none;
+  padding: 4px 12px;
+  width: 100%;
+  background-color: #fff;
+}
+.timepicker-btn:hover {
+  background-color: #eee;
+}
+
+.chevron-up {
+  position: relative;
+  top: 2px;
+  fill: #666;
+}
+.chevron-down {
+  position: relative;
+  top: 2px;
+  fill: #666;
+}
