@@ -34,13 +34,13 @@
   background-color: #eee;
 }
 
-.chevron-up {
+.chevron-up::before {
+  content: url("chevron-up.svg");
   position: relative;
   top: 2px;
-  fill: #666;
 }
-.chevron-down {
+.chevron-down::before {
+  content: url("chevron-down.svg");
   position: relative;
   top: 2px;
-  fill: #666;
 }
