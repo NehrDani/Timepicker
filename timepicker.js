@@ -14,7 +14,8 @@
       hourStep: 1,
       minuteStep: 1,
       minTime: null,
-      maxTime: null
+      maxTime: null,
+      onSelect: null
     };
 
     this.time = null;
