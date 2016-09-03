@@ -1,6 +1,6 @@
 {
   "name": "Timepicker",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "description": "Javascript Timepicker | lightweight, customizable CSS, no dependencies",
   "keywords": [
     "timepicker",
@@ -11,5 +11,9 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/NehrDani/Timepicker.git"
-  }
+  },
+  "bugs": {
+    "url": "https://github.com/NehrDani/Timepicker/issues"
+  },
+  "homepage": "https://nehrdani.github.io/Timepicker/"
 }
