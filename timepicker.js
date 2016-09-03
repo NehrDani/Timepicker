@@ -4,7 +4,7 @@
  * Copyright © 2016 Daniel Nehring | MIT license | https://github.com/NehrDani/Timepicker
  */
 
-(function (window, document) {
+(function (window, document, undefined) {
   window.Timepicker = Timepicker;
 
   function Timepicker () {
@@ -12,7 +12,9 @@
       container: null,
       hours: 12,
       hourStep: 1,
-      minuteStep: 1
+      minuteStep: 1,
+      minTime: null,
+      maxTime: null
     };
 
     this.time = null;
@@ -145,69 +147,201 @@
   }
 
   function renderTimepicker () {
-    /* eslint-disable */
-    var timepicker = [
-      '<table>',
-        '<body>',
-          '<tr>',
-            '<td><button class="timepicker-btn" data-action="HOUR_UP" type="button">',
-              '<i class="chevron-up"></i>',
-            '</button></td>',
-            '<td></td>',
-            '<td><button class="timepicker-btn" data-action="MINUTE_UP" type="button">',
-              '<i class="chevron-up"></i>',
-            '</button></td>',
-            '<td></td>',
-          '</tr>',
-          '<tr>',
-            '<td><button class="timepicker-btn timepicker-hour" data-action="SET_MODE" value="hour" type="button">',
-            '</button></td>',
-            '<td>:</td>',
-            '<td><button class="timepicker-btn timepicker-minute" data-action="SET_MODE" value="minute" type="button">',
-            '</button></td>'
-    ].join("");
-
-    if (this._config.hours === 12) {
-      timepicker += [
-        '<td><button class="timepicker-btn timepicker-period" data-action="SET_PERIOD" type="button">',
-          'AM',
-        '</button></td>'
-      ].join("");
-    } else {
-      timepicker += '<td></td>';
-    }
-
-    timepicker += [
-          '</tr>',
-          '<tr>',
-            '<td><button class="timepicker-btn" data-action="HOUR_DOWN" type="button">',
-              '<i class="chevron-down"></i>',
-            '</button></td>',
-            '<td></td>',
-            '<td><button class="timepicker-btn" data-action="MINUTE_DOWN" type="button">',
-              '<i class="chevron-down"></i>',
-            '</button></td>',
-            '<td></td>',
-          '</tr>',
-        '</tbody>',
-      '</table>'
-    ].join("");
-    /* eslint-enable */
-
-    this._timepicker.innerHTML = timepicker;
-
+    var row, col, btn;
     var setState = this._setState.bind(this);
-    var buttons = this._timepicker.querySelectorAll(".timepicker-btn");
-    for (var i = 0, len = buttons.length; i < len; i++) {
-      buttons[i].addEventListener("mousedown", function () {
+
+    // <table>
+    var table = createElement("table");
+
+    // <tr>
+    row = table.insertRow();
+
+    /* HOUR_UP */
+    // <td>
+    col = row.insertCell();
+    // <button .timepicker-btn>
+    btn = createElement("button", {
+      class: "timepicker-btn",
+      "data-action": "HOUR_UP",
+      type: "button"
+    });
+    btn.appendChild(createElement("i", {
+      class: "chevron-up"
+    }));
+    btn.addEventListener("click", function () {
+      setState({
+        action: this.getAttribute("data-action")
+      });
+    });
+    // </button .timepicker-btn>
+    col.appendChild(btn);
+    // </td>
+
+    /* Placeholder */
+    // <td>
+    row.insertCell();
+    // </td>
+
+    /* MINUTE_UP */
+    // <td>
+    col = row.insertCell();
+    // <button .timepicker-btn>
+    btn = createElement("button", {
+      class: "timepicker-btn",
+      "data-action": "MINUTE_UP",
+      type: "button"
+    });
+    btn.appendChild(createElement("i", {
+      class: "chevron-up"
+    }));
+    btn.addEventListener("click", function () {
+      setState({
+        action: this.getAttribute("data-action")
+      });
+    });
+    // </button .timepicker-btn>
+    col.appendChild(btn);
+    // </td>
+
+    /* Placeholder if 12 hr notation is set */
+    if (this._config.hours === 12) {
+      // <td>
+      row.insertCell();
+      // </td>
+    }
+    // </tr>
+
+    // <tr>
+    row = table.insertRow();
+
+    /* Display hour */
+    // <td>
+    col = row.insertCell();
+    // <button .timepicker-btn>
+    btn = createElement("button", {
+      class: "timepicker-btn timepicker-hour",
+      "data-action": "SET_MODE",
+      value: "hour",
+      type: "button"
+    });
+    btn.addEventListener("click", function () {
+      setState({
+        action: this.getAttribute("data-action"),
+        value: this.value
+      });
+    });
+    // </button .timepicker-btn>
+    col.appendChild(btn);
+    // </td>
+
+    /* colon */
+    // <td>
+    col = row.insertCell();
+    col.innerHTML = ":";
+    // </td>
+
+    /* Display Minute */
+    // <td>
+    col = row.insertCell();
+    // <button .timepicker-btn>
+    btn = createElement("button", {
+      class: "timepicker-btn timepicker-minute",
+      "data-action": "SET_MODE",
+      value: "minute",
+      type: "button"
+    });
+    btn.addEventListener("click", function () {
+      setState({
+        action: this.getAttribute("data-action"),
+        value: this.value
+      });
+    });
+    // </button .timepicker-btn>
+    col.appendChild(btn);
+    // </td>
+
+    /* Display period if 12 hr notation is set */
+    if (this._config.hours === 12) {
+      // <td>
+      col = row.insertCell();
+      // <button .timepicker-btn>
+      btn = createElement("button", {
+        class: "timepicker-btn timepicker-period",
+        "data-action": "SET_PERIOD",
+        type: "button"
+      });
+      btn.addEventListener("click", function () {
         setState({
-          action: this.getAttribute("data-action"),
-          value: this.value
+          action: this.getAttribute("data-action")
         });
       });
+      // </button .timepicker-btn>
+      col.appendChild(btn);
     }
+    // </td>
+    // </tr>
 
-    return timepicker;
+    // <tr>
+    row = table.insertRow();
+
+    /* HOUR_UP */
+    // <td>
+    col = row.insertCell();
+    // <button .timepicker-btn>
+    btn = createElement("button", {
+      class: "timepicker-btn",
+      "data-action": "HOUR_DOWN",
+      type: "button"
+    });
+    btn.appendChild(createElement("i", {
+      class: "chevron-down"
+    }));
+    btn.addEventListener("click", function () {
+      setState({
+        action: this.getAttribute("data-action")
+      });
+    });
+    // </button .timepicker-btn>
+    col.appendChild(btn);
+    // </td>
+
+    /* Placeholder */
+    // <td>
+    row.insertCell();
+    // </td>
+
+    /* MINUTE_UP */
+    // <td>
+    col = row.insertCell();
+    // <button .timepicker-btn>
+    btn = createElement("button", {
+      class: "timepicker-btn",
+      "data-action": "MINUTE_DOWN",
+      type: "button"
+    });
+    btn.appendChild(createElement("i", {
+      class: "chevron-down"
+    }));
+    btn.addEventListener("click", function () {
+      setState({
+        action: this.getAttribute("data-action")
+      });
+    });
+    // </button .timepicker-btn>
+    col.appendChild(btn);
+    // </td>
+
+    /* Placeholder if 12 hr notation is set */
+    if (this._config.hours === 12) {
+      // <td>
+      row.insertCell();
+      // </td>
+    }
+    // </tr>
+
+    this._timepicker.innerHTML = null;
+    this._timepicker.appendChild(table);
+    return table;
   }
 
   function renderHourpicker () {
@@ -218,14 +352,14 @@
     var max = (hours === 12) ? 3 : 6;
 
     // <table>
-    var hourpicker = createElement("table");
+    var table = createElement("table");
 
     // <tr>
-    row = createElement("tr");
+    row = table.insertRow();
 
     for (var i = 0, c = 0; i < hours; i++) {
       // <td>
-      col = createElement("td");
+      col = row.insertCell();
       // <button .timepicker-btn>
       btn = createElement("button", {
         class: "timepicker-btn",
@@ -242,23 +376,20 @@
       });
       col.appendChild(btn);
       // </button .timepicker-btn>
-      row.appendChild(col);
       // </td>
+      // </tr>
 
       if (++c === max) {
-        hourpicker.appendChild(row);
-        // </tr>
-
         // <tr>
-        row = createElement("tr");
+        row = table.insertRow();
         c = 0;
       }
     }
     // </table>
 
     this._timepicker.innerHTML = null;
-    this._timepicker.appendChild(hourpicker);
-    return hourpicker;
+    this._timepicker.appendChild(table);
+    return table;
   }
 
   function renderMinutepicker () {
@@ -266,14 +397,14 @@
     var setState = this._setState.bind(this);
 
     // <table>
-    var minutepicker = createElement("table");
+    var table = createElement("table");
 
     // <tr>
-    row = createElement("tr");
+    row = table.insertRow();
 
     for (var i = 0, c = 0; i < 12; i++) {
       // <td>
-      col = createElement("td");
+      col = row.insertCell();
       // <button .timepicker-btn>
       btn = createElement("button", {
         class: "timepicker-btn",
@@ -290,23 +421,20 @@
       });
       col.appendChild(btn);
       // </button .timepicker-btn>
-      row.appendChild(col);
       // </td>
+      // </tr>
 
       if (++c === 3) {
-        minutepicker.appendChild(row);
-        // </tr>
-
         // <tr>
-        row = createElement("tr");
+        row = table.insertRow();
         c = 0;
       }
     }
     // </table>
 
     this._timepicker.innerHTML = null;
-    this._timepicker.appendChild(minutepicker);
-    return minutepicker;
+    this._timepicker.appendChild(table);
+    return table;
   }
 
   /* Utility methods */
