@@ -31,7 +31,7 @@
               container: demo.querySelector(".container-12"),
               onChange: function (time) {
                 var hour = time.getHours();
-                var minute = time.getMinutes();
+                var minute = ("0" + time.getMinutes()).slice(-2);
                 var period = (hour >= 12) ? "PM" : "AM";
 
                 hour = (hour > 12 || hour === 0) ? Math.abs(hour - 12) : hour;
