@@ -9,10 +9,18 @@
 </head>
 <body>
   <main class="container">
+    <div class="jumbotron">
+      <h1>Timepicker</h1>
+      <p>
+        Javascript Timepicker | lightweight, customizable CSS, no dependencies, extendable
+      </p>
+      <a href="https://github.com/NehrDani/Timepicker">Timepicker source on GitHub</a>
+    </div>
+
     <div class="row">
       <section id="example-12" class="col-md-3">
         <header class="page-header">
-          <h2>12H Notation</h2>
+          <h2>12-Hour Clock</h2>
         </header>
 
         <div class="form-group">
@@ -28,11 +36,17 @@
 
         <div class="container-12 form-group"></div>
 
+        <div class="form-group">
+          <button class="btn btn-default set-time" value="now">Now</button>
+          <button class="btn btn-default set-time" value="midnight">Midnight</button>
+          <button class="btn btn-default set-time" value="clear">Clear</button>
+        </div>
+
         <script>
           document.addEventListener("DOMContentLoaded", function () {
             var demo = document.getElementById("example-12");
             var input = demo.querySelector("input");
-            var selected = new Date();
+            var selected = null;
             var format = 12;
 
             var timepicker = new Timepicker({
@@ -41,6 +55,12 @@
                 selected = time;
                 input.value = formatTime(time, format);
               }
+            });
+
+            input.addEventListener("input", function () {
+              var time = formatTime(this.value, format, true);
+              selected = time;
+              timepicker.setTime(time);
             });
 
             var toggle = demo.querySelector(".toggle");
@@ -54,13 +74,22 @@
               }
               input.value = input.value = formatTime(selected, format);
             });
+
+            var set = demo.querySelectorAll(".set-time");
+            for (var i = 0; i < set.length; i++) {
+              set[i].addEventListener("click", function () {
+                selected = getTime(this.value);
+                input.value = formatTime(selected, format);
+                timepicker.setTime(selected);
+              });
+            }
           });
         </script>
       </section>
 
       <section id="example-24" class="col-md-3">
         <header class="page-header">
-          <h2>24H Notation</h2>
+          <h2>24-Hour Clock</h2>
         </header>
 
         <div class="form-group">
@@ -76,11 +105,15 @@
 
         <div class="container-24 form-group"></div>
 
+        <button class="btn btn-default set-time" value="noon">Noon</button>
+        <button class="btn btn-default set-time" value="20:15">8:15 PM</button>
+        <button class="btn btn-default set-time" value="clear">Clear</button>
+
         <script>
           document.addEventListener("DOMContentLoaded", function () {
             var demo = document.getElementById("example-24");
             var input = demo.querySelector("input");
-            var selected = new Date();
+            var selected = null;
             var format = 24;
 
             var timepicker = new Timepicker({
@@ -90,6 +123,11 @@
                 selected = time;
                 input.value = input.value = formatTime(time, format);
               }
+            });
+
+            input.addEventListener("input", function () {
+              var time = formatTime(this.value, format, true);
+              timepicker.setTime(time);
             });
 
             var toggle = demo.querySelector(".toggle");
@@ -103,6 +141,15 @@
               }
               input.value = input.value = formatTime(selected, format);
             });
+
+            var set = demo.querySelectorAll(".set-time");
+            for (var i = 0; i < set.length; i++) {
+              set[i].addEventListener("click", function () {
+                selected = getTime(this.value);
+                input.value = formatTime(selected, format);
+                timepicker.setTime(selected);
+              });
+            }
           });
         </script>
       </section>
@@ -110,19 +157,66 @@
   </main>
 
   <script>
-    function formatTime (time, format) {
-      var hour = time.getHours();
-      var minute = ("0" + time.getMinutes()).slice(-2);
-      var period = (hour >= 12) ? "PM" : "AM";
+    function getTime (value) {
+      var time = new Date();
 
-      if (format === 12) {
-        hour = (hour > 12 || hour === 0) ? Math.abs(hour - 12) : hour;
-        return hour + ":" + minute + " " + period;
-      } else {
-        hour = ("0" + time.getHours()).slice(-2);
-        return hour + ":" + minute;
+      if (value === "clear")
+        return null;
+
+      switch (value) {
+      case "now":
+        break;
+      case "midnight":
+        time.setHours(0, 0, 0, 0);
+        break;
+      case "noon":
+        time.setHours(12, 0, 0, 0);
+        break;
+      default:
+        time = new Date(formatTime(value, 24, true));
+        break;
       }
 
+      return time;
+    }
+
+    function formatTime (time, format, reverse) {
+      if (!time) return null;
+      if (reverse) {
+        if (/^\d{1,2}:\d{2}(\sAM|\sPM)?$/.test(time)) {
+          time = time.split(/[:\s]/);
+          var hour = +time[0];
+          var minute = +time[1];
+          var period = time[2];
+
+          if (format === 12 && period) {
+            if (period === "AM" && hour === 12) {
+              hour = 0;
+            } else if (period === "PM" && hour < 12) {
+              hour += 12;
+            }
+            time = new Date();
+            time.setHours(hour, minute, 0, 0);
+            return time;
+          } else if (format === 24) {
+            time = new Date();
+            time.setHours(hour, minute, 0, 0);
+            return time;
+          }
+        }
+      } else {
+        var hour = time.getHours();
+        var minute = ("0" + time.getMinutes()).slice(-2);
+        var period = (hour >= 12) ? "PM" : "AM";
+
+        if (format === 12) {
+          hour = (hour > 12 || hour === 0) ? Math.abs(hour - 12) : hour;
+          return hour + ":" + minute + " " + period;
+        } else {
+          hour = ("0" + time.getHours()).slice(-2);
+          return hour + ":" + minute;
+        }
+      }
       return false;
     }
   </script>
