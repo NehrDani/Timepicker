@@ -37,7 +37,8 @@
     _render: render,
     _setState: setState,
     setTime: setTime,
-    clearTime: clearTime
+    clearTime: clearTime,
+    destroy: destroy
   };
 
   function setTime (time) {
@@ -51,6 +52,12 @@
     return this._setState({
       action: "CLEAR_TIME"
     });
+  }
+
+  function destroy () {
+    this._timepicker.parentNode.removeChild(this._timepicker);
+    this._timepicker = null;
+    return null;
   }
 
   function setState (state) {
