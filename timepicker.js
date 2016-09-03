@@ -10,7 +10,7 @@
   function Timepicker () {
     var defaults = {
       container: null,
-      notation: 12
+      hours: 12
     };
 
     this.time = new Date();
@@ -35,45 +35,77 @@
   };
 
   function setTime (time) {
-    this.time = new Date(time);
-    this._state.hour = this.time.getHours();
-    this._state.minute = this.time.getMinutes();
-
-    renderTimepicker.call(this);
+    this._setState({
+      action: "SET_TIME",
+      value: time
+    });
   }
 
   function setState (state) {
     switch (state.action) {
-      case "HOUR_UP":
-        this._state.hour += 1;
-        if (this._state.hour > 23)
-          this._state.hour = 0;
+    case "SET_TIME":
+      this.time = new Date(state.value);
+      break;
+    case "SET_HOUR":
+      this.time.setHours(state.value, this._state.minute, 0, 0);
+      this._state.mode = "time";
+      renderTimepicker.call(this);
+      break;
+    case "HOUR_UP":
+      this.time.setHours(this._state.hour + 1, this._state.minute, 0, 0);
+      break;
+    case "HOUR_DOWN":
+      this.time.setHours(this._state.hour - 1, this._state.minute, 0, 0);
+      break;
+    case "SET_MINUTE":
+      this.time.setMinutes(state.value, 0, 0);
+      this._state.mode = "time";
+      renderTimepicker.call(this);
+      break;
+    case "MINUTE_UP":
+      this.time.setMinutes(this._state.minute + 1, 0, 0);
+      break;
+    case "MINUTE_DOWN":
+      this.time.setMinutes(this._state.minute - 1, 0, 0);
+      break;
+    case "SET_PERIOD":
+      this._state.hour = (this._state.hour > 12) ?
+        this._state.hour -= 12 : this._state.hour += 12;
+      this.time.setHours(this._state.hour, this._state.minute, 0, 0);
+      break;
+    case "SET_MODE":
+      this._state.mode = state.value;
+      switch (this._state.mode) {
+      case "hour":
+        renderHourpicker.call(this);
         break;
-      case "HOUR_DOWN":
-        this._state.hour -= 1;
-        if (this._state.hour < 0)
-          this._state.hour = 23;
+      case "minute":
+        renderMinutepicker.call(this);
         break;
-      case "MINUTE_UP":
-        this._state.minute += 1;
-        if (this._state.minute > 60)
-          this._state.minute = 0;
-        break;
-      case "MINUTE_DOWN":
-        this._state.minute -= 1;
-        if (this._state.minute < 0)
-          this._state.minute = 60;
-        break;
+      }
+      break;
     }
 
+    this._state.hour = this.time.getHours();
+    this._state.minute = this.time.getMinutes();
+
     if (this._state.mode === "time") {
-      var hour = this._config.notation === 12 && (this._state.hour > 12 || this._state.hour === 0) ?
-        Math.abs(this._state.hour - 12) : this._state.hour;
-      hour = hour !== null ? ("0" + hour).slice(-2) : "---";
-      this._timepicker.querySelector(".timepicker-hour")
-        .innerHTML = hour;
-      // renderTimepicker.call(this);
+      render.call(this);
     }
+  }
+
+  function render () {
+    var hour = getHour(this._state.hour, this._config.hours);
+    var minute = (this._state.minute !== null) ?
+      ("0" + this._state.minute).slice(-2) : "_";
+    var period = this._state.hour >= 12 ? "PM" : "AM";
+
+    this._timepicker
+      .querySelector(".timepicker-hour").innerHTML = hour;
+    this._timepicker
+      .querySelector(".timepicker-minute").innerHTML = minute;
+    this._timepicker
+      .querySelector(".timepicker-period").innerHTML = period;
   }
 
   function init () {
@@ -85,16 +117,7 @@
   }
 
   function renderTimepicker () {
-    var setState = this._setState.bind(this);
-    var notation = this._config.notation;
-    var hour = notation === 12 && (this._state.hour > 12 || this._state.hour === 0) ?
-      Math.abs(this._state.hour - 12) : this._state.hour;
-    hour = hour !== null ? ("0" + hour).slice(-2) : "---";
-    var minute = this._state.minute;
-    minute = minute !== null ? ("0" + minute).slice(-2) : "---";
-    var period = this._state.hour >= 12 ? "PM" : "AM";
-
-    /* eslint quotes: 0, indent: 0*/
+    /* eslint-disable */
     var timepicker = [
       '<table>',
         '<tr>',
@@ -108,15 +131,15 @@
           '<td></td>',
         '</tr>',
         '<tr>',
-          '<td><button class="timepicker-btn timepicker-hour" type="button">',
-            hour,
+          '<td><button class="timepicker-btn timepicker-hour" data-action="SET_MODE" value="hour" type="button">',
+            '_',
           '</button></td>',
           '<td>:</td>',
-          '<td><button class="timepicker-btn timepicker-minute" type="button">',
-            minute,
+          '<td><button class="timepicker-btn timepicker-minute" data-action="SET_MODE" value="minute" type="button">',
+            '_',
           '</button></td>',
-          '<td><button class="timepicker-btn timepicker-period" type="button">',
-            period,
+          '<td><button class="timepicker-btn timepicker-period" data-action="SET_PERIOD" type="button">',
+            'AM',
           '</button></td>',
         '</tr>',
         '<tr>',
@@ -130,13 +153,14 @@
         '</tr>',
       '</table>'
     ].join("");
+    /* eslint-enable */
 
     this._timepicker.innerHTML = timepicker;
 
+    var setState = this._setState.bind(this);
     var buttons = this._timepicker.querySelectorAll(".timepicker-btn");
     for (var i = 0, len = buttons.length; i < len; i++) {
       buttons[i].addEventListener("mousedown", function () {
-        console.log("down");
         setState({
           action: this.getAttribute("data-action"),
           value: this.value
@@ -144,10 +168,140 @@
       });
     }
 
-    return this._timepicker;
+    return timepicker;
+  }
+
+  function renderHourpicker () {
+    var row, col, btn;
+    var setState = this._setState.bind(this);
+    var hours = this._config.hours;
+    var add = (hours === 12) ? 1 : 0;
+
+    // <table>
+    var hourpicker = createElement("table");
+
+    // <tr>
+    row = createElement("tr");
+
+    for (var i = 0, c = 0; i < hours; i++) {
+      // <td>
+      col = createElement("td");
+      // <button .timepicker-btn>
+      btn = createElement("button", {
+        class: "timepicker-btn",
+        "data-action": "SET_HOUR",
+        type: "button",
+        value: i + add
+      });
+      btn.innerHTML = ("0" + (i + add)).slice(-2);
+      btn.addEventListener("click", function () {
+        setState({
+          action: this.getAttribute("data-action"),
+          value: this.value
+        });
+      });
+      col.appendChild(btn);
+      // </button .timepicker-btn>
+      row.appendChild(col);
+      // </td>
+
+      if (++c === 4) {
+        hourpicker.appendChild(row);
+        // </tr>
+
+        // <tr>
+        row = createElement("tr");
+        c = 0;
+      }
+    }
+    // </table>
+
+    this._timepicker.innerHTML = null;
+    this._timepicker.appendChild(hourpicker);
+    return hourpicker;
+  }
+
+  function renderMinutepicker () {
+    var row, col, btn;
+    var setState = this._setState.bind(this);
+
+    // <table>
+    var minutepicker = createElement("table");
+
+    // <tr>
+    row = createElement("tr");
+
+    for (var i = 0, c = 0; i < 12; i++) {
+      // <td>
+      col = createElement("td");
+      // <button .timepicker-btn>
+      btn = createElement("button", {
+        class: "timepicker-btn",
+        "data-action": "SET_MINUTE",
+        type: "button",
+        value: i * 5
+      });
+      btn.innerHTML = ("0" + (i * 5)).slice(-2);
+      btn.addEventListener("click", function () {
+        setState({
+          action: this.getAttribute("data-action"),
+          value: this.value
+        });
+      });
+      col.appendChild(btn);
+      // </button .timepicker-btn>
+      row.appendChild(col);
+      // </td>
+
+      if (++c === 4) {
+        minutepicker.appendChild(row);
+        // </tr>
+
+        // <tr>
+        row = createElement("tr");
+        c = 0;
+      }
+    }
+    // </table>
+
+    this._timepicker.innerHTML = null;
+    this._timepicker.appendChild(minutepicker);
+    return minutepicker;
   }
 
   /* Utility methods */
+  function createElement (element, options) {
+    var node = document.createElement(element);
+
+    if (options !== undefined) {
+      for (var option in options) {
+        switch (option) {
+        case "class":
+          node.className = options[option];
+          break;
+        default:
+          node.setAttribute(option, options[option]);
+          break;
+        }
+      }
+    }
+
+    return node;
+  }
+
+  function getHour (hour, hours) {
+    if (hour !== null) {
+      if (hours === 12 && (hour > 12 || hour === 0)) {
+        hour = Math.abs(hour - 12);
+      }
+      hour = ("0" + hour).slice(-2);
+    } else {
+      hour = "_";
+    }
+
+    return hour;
+  }
+
   function extend (properties) {
     properties = properties || {};
 
