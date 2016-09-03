@@ -8,15 +8,46 @@
   <script src="timepicker.js"></script>
 </head>
 <body>
-  <main class="content">
+  <main class="container">
+    <div class="row">
+      <section id="example-12" class="col-md-3">
+        <header class="page-header">
+          <h2>12H Notation</h2>
+        </header>
+
+        <div class="form-group">
+        </div>
+
+        <script>
+          var demo = document.getElementById("example-12");
+          var timepicker = new Timepicker({
+            container: demo.querySelector(".form-group"),
+            hours: 12
+          });
+          // timepicker.setTime(Date.now());
+        </script>
+      </section>
+
+      <section id="example-24" class="col-md-3">
+        <header class="page-header">
+          <h2>24H Notation</h2>
+        </header>
+
+        <div class="form-group">
+        </div>
+
+        <script>
+          var demo = document.getElementById("example-24");
+          var timepicker = new Timepicker({
+            container: demo.querySelector(".form-group"),
+            hours: 24
+          });
+          // timepicker.setTime(Date.now());
+        </script>
+      </section>
+    </div>
   </main>
 
-  <script>
-    var timepicker = new Timepicker({
-      container: document.querySelector(".content"),
-      hours: 24
-    });
-    timepicker.setTime(Date.now());
-  </script>
+
 </body>
 </html>

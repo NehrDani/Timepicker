@@ -8,12 +8,10 @@
   padding: 10px;
   color: #444;
   font-size: 14px;
-  width: 260px;
 }
 
 .timepicker table {
   width: 100%;
-  table-layout: fixed;
   border-collapse: collapse;
 }
 
@@ -26,7 +24,7 @@
 .timepicker-btn {
   border: none;
   outline: none;
-  padding: 6px 12px;
+  padding: 6px 0;
   width: 100%;
   background-color: #fff;
 }
