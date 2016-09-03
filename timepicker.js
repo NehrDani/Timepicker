@@ -69,10 +69,13 @@
         this.time = new Date(state.value);
         this._state.hour = this.time.getHours();
         this._state.minute = this.time.getMinutes();
-        this._render();
+        this._state.period = (this._state.hour >= 12) ? "PM" : "AM";
       } else {
         this.time = null;
+        this._state.hour = null;
+        this._state.minute = null;
       }
+      this._render();
       return this.time;
     case "CLEAR_TIME":
       this.time = null;
