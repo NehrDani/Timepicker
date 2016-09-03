@@ -10,7 +10,7 @@
   function Timepicker () {
     var defaults = {
       container: null,
-      hours: 12,
+      clock: 12,
       hourStep: 1,
       minuteStep: 1,
       onChange: null
@@ -151,7 +151,7 @@
 
   function render () {
     if (this._state.mode === "time") {
-      var hour = getHour(this._state.hour, this._config.hours);
+      var hour = getHour(this._state.hour, this._config.clock);
       var minute = (this._state.minute !== null) ?
         ("0" + this._state.minute).slice(-2) : "-";
 
@@ -159,7 +159,7 @@
         .querySelector(".timepicker-hour").innerHTML = hour;
       this._timepicker
         .querySelector(".timepicker-minute").innerHTML = minute;
-      if (this._config.hours === 12) {
+      if (this._config.clock === 12) {
         this._timepicker
           .querySelector(".timepicker-period").innerHTML = this._state.period;
       }
@@ -232,8 +232,8 @@
     col.appendChild(btn);
     // </td>
 
-    /* Placeholder if 12 hr notation is set */
-    if (this._config.hours === 12) {
+    /* Placeholder if 12 hr clock is set */
+    if (this._config.clock === 12) {
       // <td>
       row.insertCell();
       // </td>
@@ -289,8 +289,8 @@
     col.appendChild(btn);
     // </td>
 
-    /* Display period if 12 hr notation is set */
-    if (this._config.hours === 12) {
+    /* Display period if 12 hr clock is set */
+    if (this._config.clock === 12) {
       // <td>
       col = row.insertCell();
       // <button .timepicker-btn>
@@ -360,8 +360,8 @@
     col.appendChild(btn);
     // </td>
 
-    /* Placeholder if 12 hr notation is set */
-    if (this._config.hours === 12) {
+    /* Placeholder if 12 hr clock is set */
+    if (this._config.clock === 12) {
       // <td>
       row.insertCell();
       // </td>
@@ -376,7 +376,7 @@
   function renderHourpicker () {
     var row, col, btn;
     var setState = this._setState.bind(this);
-    var hours = this._config.hours, hour;
+    var clock = this._config.clock, hour;
 
     // <table>
     var table = createElement("table");
@@ -384,11 +384,11 @@
     // <tr>
     row = table.insertRow();
 
-    for (var i = 0, c = 0; i < hours; i++) {
+    for (var i = 0, c = 0; i < clock; i++) {
       hour = i;
       // Add 1 hour since there is no 0 hour in AM/PM
       // Add 12 hours if in PM
-      if (hours === 12) {
+      if (clock === 12) {
         if (i === 0) {
           if (this._state.period === "PM")
             hour = 12;
@@ -409,8 +409,8 @@
         type: "button",
         value: hour
       });
-      // Convert hour to correct hours notation
-      hour = (hours === 12 && hour > 12) ? hour - 12 : hour;
+      // Convert hour to correct clock
+      hour = (clock === 12 && hour > 12) ? hour - 12 : hour;
       btn.innerHTML = ("0" + hour).slice(-2);
       btn.addEventListener("click", function () {
         setState({
@@ -423,7 +423,7 @@
       // </td>
       // </tr>
 
-      if (++c === (hours / 4)) {
+      if (++c === (clock / 4)) {
         // <tr>
         row = table.insertRow();
         c = 0;
@@ -482,9 +482,9 @@
   }
 
   /* Utility & helper methods */
-  function getHour (hour, hours) {
+  function getHour (hour, clock) {
     if (hour !== null) {
-      if (hours === 12 && (hour > 12 || hour === 0)) {
+      if (clock === 12 && (hour > 12 || hour === 0)) {
         hour = Math.abs(hour - 12);
       }
       hour = ("0" + hour).slice(-2);
