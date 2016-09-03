@@ -13,8 +13,6 @@
       hours: 12,
       hourStep: 1,
       minuteStep: 1,
-      minTime: null,
-      maxTime: null,
       onSelect: null
     };
 
@@ -22,8 +20,9 @@
 
     this._state = {
       mode: "time",
-      hour: 0,
-      minute: 0
+      hour: null,
+      minute: null,
+      period: "AM"
     };
 
     this._timepicker = null;
@@ -37,13 +36,20 @@
     _init: init,
     _render: render,
     _setState: setState,
-    setTime: setTime
+    setTime: setTime,
+    clearTime: clearTime
   };
 
   function setTime (time) {
     return this._setState({
       action: "SET_TIME",
       value: time
+    });
+  }
+
+  function clearTime () {
+    return this._setState({
+      action: "CLEAR_TIME"
     });
   }
 
@@ -61,6 +67,12 @@
         this.time = null;
       }
       return this.time;
+    case "CLEAR_TIME":
+      this.time = null;
+      this._state.hour = null;
+      this._state.minute = null;
+      this._render();
+      return null;
     case "SET_HOUR":
       this._state.hour = state.value;
       this._state.mode = "time";
@@ -98,6 +110,10 @@
     case "SET_MODE":
       this._state.mode = state.value;
       switch (this._state.mode) {
+      case "time":
+        renderTimepicker.call(this);
+        this._render();
+        break;
       case "hour":
         renderHourpicker.call(this);
         break;
@@ -113,6 +129,7 @@
     this.time.setHours(this._state.hour, this._state.minute, 0, 0);
     this._state.hour = this.time.getHours();
     this._state.minute = this.time.getMinutes();
+    this._state.period = this._state.hour >= 12 ? "PM" : "AM";
 
     // Rerender current state
     this._render();
@@ -124,8 +141,7 @@
     if (this._state.mode === "time") {
       var hour = getHour(this._state.hour, this._config.hours);
       var minute = (this._state.minute !== null) ?
-        ("0" + this._state.minute).slice(-2) : "";
-      var period = this._state.hour >= 12 ? "PM" : "AM";
+        ("0" + this._state.minute).slice(-2) : "-";
 
       this._timepicker
         .querySelector(".timepicker-hour").innerHTML = hour;
@@ -133,7 +149,7 @@
         .querySelector(".timepicker-minute").innerHTML = minute;
       if (this._config.hours === 12) {
         this._timepicker
-          .querySelector(".timepicker-period").innerHTML = period;
+          .querySelector(".timepicker-period").innerHTML = this._state.period;
       }
     }
   }
@@ -350,7 +366,6 @@
     var setState = this._setState.bind(this);
     var hours = this._config.hours;
     var add = (hours === 12) ? 1 : 0;
-    var max = (hours === 12) ? 3 : 6;
 
     // <table>
     var table = createElement("table");
@@ -380,7 +395,7 @@
       // </td>
       // </tr>
 
-      if (++c === max) {
+      if (++c === (hours / 4)) {
         // <tr>
         row = table.insertRow();
         c = 0;
@@ -438,7 +453,20 @@
     return table;
   }
 
-  /* Utility methods */
+  /* Utility & helper methods */
+  function getHour (hour, hours) {
+    if (hour !== null) {
+      if (hours === 12 && (hour > 12 || hour === 0)) {
+        hour = Math.abs(hour - 12);
+      }
+      hour = ("0" + hour).slice(-2);
+    } else {
+      hour = "-";
+    }
+
+    return hour;
+  }
+
   function createElement (element, options) {
     var node = document.createElement(element);
 
@@ -456,19 +484,6 @@
     }
 
     return node;
-  }
-
-  function getHour (hour, hours) {
-    if (hour !== null) {
-      if (hours === 12 && (hour > 12 || hour === 0)) {
-        hour = Math.abs(hour - 12);
-      }
-      hour = ("0" + hour).slice(-2);
-    } else {
-      hour = "";
-    }
-
-    return hour;
   }
 
   function extend (properties) {
