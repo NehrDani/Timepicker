@@ -10,10 +10,12 @@
   function Timepicker () {
     var defaults = {
       container: null,
-      hours: 12
+      hours: 12,
+      hourStep: 1,
+      minuteStep: 1
     };
 
-    this.time = new Date();
+    this.time = null;
 
     this._state = {
       mode: "time",
@@ -35,43 +37,59 @@
   };
 
   function setTime (time) {
-    this._setState({
+    return this._setState({
       action: "SET_TIME",
       value: time
     });
   }
 
   function setState (state) {
+    var step;
+
     switch (state.action) {
     case "SET_TIME":
-      this.time = new Date(state.value);
-      break;
+      if (state.value) {
+        this.time = new Date(state.value);
+        this._state.hour = this.time.getHours();
+        this._state.minute = this.time.getMinutes();
+        render.call(this);
+      } else {
+        this.time = null;
+      }
+      return this.time;
     case "SET_HOUR":
-      this.time.setHours(state.value, this._state.minute, 0, 0);
+      this._state.hour = state.value;
       this._state.mode = "time";
       renderTimepicker.call(this);
       break;
     case "HOUR_UP":
-      this.time.setHours(this._state.hour + 1, this._state.minute, 0, 0);
+      step = this._config.hourStep;
+      this._state.hour += step;
+      this._state.hour = Math.floor(this._state.hour / step) * step;
       break;
     case "HOUR_DOWN":
-      this.time.setHours(this._state.hour - 1, this._state.minute, 0, 0);
+      step = this._config.hourStep;
+      this._state.hour -= step;
+      this._state.hour = Math.ceil(this._state.hour / step) * step;
       break;
     case "SET_MINUTE":
-      this.time.setMinutes(state.value, 0, 0);
+      this._state.minute = state.value;
       this._state.mode = "time";
       renderTimepicker.call(this);
       break;
     case "MINUTE_UP":
-      this.time.setMinutes(this._state.minute + 1, 0, 0);
+      step = this._config.minuteStep;
+      this._state.minute += step;
+      this._state.minute = Math.floor(this._state.minute / step) * step;
       break;
     case "MINUTE_DOWN":
-      this.time.setMinutes(this._state.minute - 1, 0, 0);
+      step = this._config.minuteStep;
+      this._state.minute -= step;
+      this._state.minute = Math.ceil(this._state.minute / step) * step;
       break;
     case "SET_PERIOD":
       this._state.hour = (this._state.hour > 12) ?
         this._state.hour -= 12 : this._state.hour += 12;
-      this.time.setHours(this._state.hour, this._state.minute, 0, 0);
       break;
     case "SET_MODE":
       this._state.mode = state.value;
@@ -83,15 +101,18 @@
         renderMinutepicker.call(this);
         break;
       }
-      break;
+      return;
     }
 
+    // Update and save state
+    this.time.setHours(this._state.hour, this._state.minute, 0, 0);
     this._state.hour = this.time.getHours();
     this._state.minute = this.time.getMinutes();
 
-    if (this._state.mode === "time") {
-      render.call(this);
-    }
+    // Rerender current state
+    render.call(this);
+
+    return this.time;
   }
 
   function render () {
@@ -104,8 +125,10 @@
       .querySelector(".timepicker-hour").innerHTML = hour;
     this._timepicker
       .querySelector(".timepicker-minute").innerHTML = minute;
-    this._timepicker
-      .querySelector(".timepicker-period").innerHTML = period;
+    if (this._config.hours === 12) {
+      this._timepicker
+        .querySelector(".timepicker-period").innerHTML = period;
+    }
   }
 
   function init () {
@@ -137,10 +160,20 @@
           '<td>:</td>',
           '<td><button class="timepicker-btn timepicker-minute" data-action="SET_MODE" value="minute" type="button">',
             '_',
-          '</button></td>',
-          '<td><button class="timepicker-btn timepicker-period" data-action="SET_PERIOD" type="button">',
-            'AM',
-          '</button></td>',
+          '</button></td>'
+    ].join("");
+
+    if (this._config.hours === 12) {
+      timepicker += [
+        '<td><button class="timepicker-btn timepicker-period" data-action="SET_PERIOD" type="button">',
+          'AM',
+        '</button></td>'
+      ].join("");
+    } else {
+      timepicker += '<td></td>';
+    }
+
+    timepicker += [
         '</tr>',
         '<tr>',
           '<td><button class="timepicker-btn" data-action="HOUR_DOWN" type="button">',
@@ -150,6 +183,7 @@
           '<td><button class="timepicker-btn" data-action="MINUTE_DOWN" type="button">',
             '<i class="chevron-down"></i>',
           '</button></td>',
+          '<td></td>',
         '</tr>',
       '</table>'
     ].join("");
