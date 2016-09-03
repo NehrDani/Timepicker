@@ -84,7 +84,7 @@
       this._render();
       return null;
     case "SET_HOUR":
-      this._state.hour = state.value;
+      this._state.hour = +state.value;
       this._state.mode = "time";
       renderTimepicker.call(this);
       break;
@@ -99,7 +99,7 @@
       this._state.hour = Math.ceil(this._state.hour / step) * step;
       break;
     case "SET_MINUTE":
-      this._state.minute = state.value;
+      this._state.minute = +state.value;
       this._state.mode = "time";
       renderTimepicker.call(this);
       break;
@@ -114,8 +114,10 @@
       this._state.minute = Math.ceil(this._state.minute / step) * step;
       break;
     case "SET_PERIOD":
-      this._state.hour = (this._state.hour > 12) ?
-        this._state.hour -= 12 : this._state.hour += 12;
+      if (this._state.hour) {
+        this._state.hour = (this._state.hour > 12) ?
+          this._state.hour -= 12 : this._state.hour += 12;
+      }
       break;
     case "SET_MODE":
       this._state.mode = state.value;
@@ -135,19 +137,21 @@
     }
 
     // Update and save state
-    this.time = new Date();
-    this.time.setHours(this._state.hour, this._state.minute, 0, 0);
-    this._state.hour = this.time.getHours();
-    this._state.minute = this.time.getMinutes();
-    this._state.period = this._state.hour >= 12 ? "PM" : "AM";
+    if (this._state.hour !== null && this._state.minute !== null) {
+      this.time = new Date();
+      this.time.setHours(this._state.hour, this._state.minute, 0, 0);
+      this._state.hour = this.time.getHours();
+      this._state.minute = this.time.getMinutes();
+      this._state.period = this._state.hour >= 12 ? "PM" : "AM";
+
+      // call onChange handler
+      if (typeof this._config.onChange === "function") {
+        this._config.onChange.call(this, this.time);
+      }
+    }
 
     // Rerender current state
     this._render();
-
-    // call onChange handler
-    if (typeof this._config.onChange === "function") {
-      this._config.onChange.call(this, this.time);
-    }
 
     return this.time;
   }
