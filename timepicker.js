@@ -13,7 +13,7 @@
       hours: 12,
       hourStep: 1,
       minuteStep: 1,
-      onSelect: null
+      onChange: null
     };
 
     this.time = null;
@@ -140,6 +140,11 @@
 
     // Rerender current state
     this._render();
+
+    // call onChange handler
+    if (typeof this._config.onChange === "function") {
+      this._config.onChange.call(this, this.time);
+    }
 
     return this.time;
   }
@@ -371,8 +376,7 @@
   function renderHourpicker () {
     var row, col, btn;
     var setState = this._setState.bind(this);
-    var hours = this._config.hours;
-    var add = (hours === 12) ? 1 : 0;
+    var hours = this._config.hours, hour;
 
     // <table>
     var table = createElement("table");
@@ -381,6 +385,21 @@
     row = table.insertRow();
 
     for (var i = 0, c = 0; i < hours; i++) {
+      hour = i;
+      // Add 1 hour since there is no 0 hour in AM/PM
+      // Add 12 hours if in PM
+      if (hours === 12) {
+        if (i === 0) {
+          if (this._state.period === "PM")
+            hour = 12;
+          else if (this._state.period === "AM")
+            hour = 24;
+        } else {
+          if (this._state.period === "PM")
+            hour += 12;
+        }
+      }
+
       // <td>
       col = row.insertCell();
       // <button .timepicker-btn>
@@ -388,9 +407,11 @@
         class: "timepicker-btn",
         "data-action": "SET_HOUR",
         type: "button",
-        value: i + add
+        value: hour
       });
-      btn.innerHTML = ("0" + (i + add)).slice(-2);
+      // Convert hour to correct hours notation
+      hour = (hours === 12 && hour > 12) ? hour - 12 : hour;
+      btn.innerHTML = ("0" + hour).slice(-2);
       btn.addEventListener("click", function () {
         setState({
           action: this.getAttribute("data-action"),
