@@ -19,8 +19,8 @@
 
     this._state = {
       mode: "time",
-      hour: null,
-      minute: null
+      hour: 0,
+      minute: 0
     };
 
     this._timepicker = null;
@@ -32,6 +32,7 @@
 
   Timepicker.prototype = {
     _init: init,
+    _render: render,
     _setState: setState,
     setTime: setTime
   };
@@ -52,7 +53,7 @@
         this.time = new Date(state.value);
         this._state.hour = this.time.getHours();
         this._state.minute = this.time.getMinutes();
-        render.call(this);
+        this._render();
       } else {
         this.time = null;
       }
@@ -105,29 +106,32 @@
     }
 
     // Update and save state
+    this.time = new Date();
     this.time.setHours(this._state.hour, this._state.minute, 0, 0);
     this._state.hour = this.time.getHours();
     this._state.minute = this.time.getMinutes();
 
     // Rerender current state
-    render.call(this);
+    this._render();
 
     return this.time;
   }
 
   function render () {
-    var hour = getHour(this._state.hour, this._config.hours);
-    var minute = (this._state.minute !== null) ?
-      ("0" + this._state.minute).slice(-2) : "_";
-    var period = this._state.hour >= 12 ? "PM" : "AM";
+    if (this._state.mode === "time") {
+      var hour = getHour(this._state.hour, this._config.hours);
+      var minute = (this._state.minute !== null) ?
+        ("0" + this._state.minute).slice(-2) : "";
+      var period = this._state.hour >= 12 ? "PM" : "AM";
 
-    this._timepicker
-      .querySelector(".timepicker-hour").innerHTML = hour;
-    this._timepicker
-      .querySelector(".timepicker-minute").innerHTML = minute;
-    if (this._config.hours === 12) {
       this._timepicker
-        .querySelector(".timepicker-period").innerHTML = period;
+        .querySelector(".timepicker-hour").innerHTML = hour;
+      this._timepicker
+        .querySelector(".timepicker-minute").innerHTML = minute;
+      if (this._config.hours === 12) {
+        this._timepicker
+          .querySelector(".timepicker-period").innerHTML = period;
+      }
     }
   }
 
@@ -137,30 +141,30 @@
     this._config.container.appendChild(this._timepicker);
 
     renderTimepicker.call(this);
+    this._render();
   }
 
   function renderTimepicker () {
     /* eslint-disable */
     var timepicker = [
       '<table>',
-        '<tr>',
-          '<td><button class="timepicker-btn" data-action="HOUR_UP" type="button">',
-            '<i class="chevron-up"></i>',
-          '</button></td>',
-          '<td></td>',
-          '<td><button class="timepicker-btn" data-action="MINUTE_UP" type="button">',
-            '<i class="chevron-up"></i>',
-          '</button></td>',
-          '<td></td>',
-        '</tr>',
-        '<tr>',
-          '<td><button class="timepicker-btn timepicker-hour" data-action="SET_MODE" value="hour" type="button">',
-            '_',
-          '</button></td>',
-          '<td>:</td>',
-          '<td><button class="timepicker-btn timepicker-minute" data-action="SET_MODE" value="minute" type="button">',
-            '_',
-          '</button></td>'
+        '<body>',
+          '<tr>',
+            '<td><button class="timepicker-btn" data-action="HOUR_UP" type="button">',
+              '<i class="chevron-up"></i>',
+            '</button></td>',
+            '<td></td>',
+            '<td><button class="timepicker-btn" data-action="MINUTE_UP" type="button">',
+              '<i class="chevron-up"></i>',
+            '</button></td>',
+            '<td></td>',
+          '</tr>',
+          '<tr>',
+            '<td><button class="timepicker-btn timepicker-hour" data-action="SET_MODE" value="hour" type="button">',
+            '</button></td>',
+            '<td>:</td>',
+            '<td><button class="timepicker-btn timepicker-minute" data-action="SET_MODE" value="minute" type="button">',
+            '</button></td>'
     ].join("");
 
     if (this._config.hours === 12) {
@@ -174,17 +178,18 @@
     }
 
     timepicker += [
-        '</tr>',
-        '<tr>',
-          '<td><button class="timepicker-btn" data-action="HOUR_DOWN" type="button">',
-            '<i class="chevron-down"></i>',
-          '</button></td>',
-          '<td></td>',
-          '<td><button class="timepicker-btn" data-action="MINUTE_DOWN" type="button">',
-            '<i class="chevron-down"></i>',
-          '</button></td>',
-          '<td></td>',
-        '</tr>',
+          '</tr>',
+          '<tr>',
+            '<td><button class="timepicker-btn" data-action="HOUR_DOWN" type="button">',
+              '<i class="chevron-down"></i>',
+            '</button></td>',
+            '<td></td>',
+            '<td><button class="timepicker-btn" data-action="MINUTE_DOWN" type="button">',
+              '<i class="chevron-down"></i>',
+            '</button></td>',
+            '<td></td>',
+          '</tr>',
+        '</tbody>',
       '</table>'
     ].join("");
     /* eslint-enable */
@@ -210,6 +215,7 @@
     var setState = this._setState.bind(this);
     var hours = this._config.hours;
     var add = (hours === 12) ? 1 : 0;
+    var max = (hours === 12) ? 3 : 6;
 
     // <table>
     var hourpicker = createElement("table");
@@ -239,7 +245,7 @@
       row.appendChild(col);
       // </td>
 
-      if (++c === 4) {
+      if (++c === max) {
         hourpicker.appendChild(row);
         // </tr>
 
@@ -287,7 +293,7 @@
       row.appendChild(col);
       // </td>
 
-      if (++c === 4) {
+      if (++c === 3) {
         minutepicker.appendChild(row);
         // </tr>
 
@@ -330,7 +336,7 @@
       }
       hour = ("0" + hour).slice(-2);
     } else {
-      hour = "_";
+      hour = "";
     }
 
     return hour;
