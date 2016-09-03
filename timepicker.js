@@ -114,7 +114,7 @@
       this._state.minute = Math.ceil(this._state.minute / step) * step;
       break;
     case "SET_PERIOD":
-      if (this._state.hour) {
+      if (this._state.hour !== null) {
         this._state.hour = (this._state.hour > 12) ?
           this._state.hour -= 12 : this._state.hour += 12;
       }
