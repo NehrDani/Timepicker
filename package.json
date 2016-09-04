@@ -1,10 +1,11 @@
 {
   "name": "Timepicker",
   "version": "0.6.2",
-  "description": "Javascript Timepicker | lightweight, customizable CSS, no dependencies",
+  "description": "Javascript Timepicker | lightweight, customizable, no dependencies",
   "keywords": [
     "timepicker",
-    "javascript"
+    "javascript",
+    "customizable"
   ],
   "author": "Daniel Nehring <nehrdani@gmail.com>",
   "license": "MIT",
