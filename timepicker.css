@@ -5,7 +5,6 @@
 .timepicker {
   position: relative;
   z-index: 10;
-  padding: 10px;
   color: #444;
   font-size: 14px;
 }

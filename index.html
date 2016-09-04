@@ -157,6 +157,76 @@
           });
         </script>
       </section>
+
+      <!-- example popup -->
+      <section id="example-popup" class="col-sm-3">
+        <style>
+          .container-popup {
+            position: absolute;
+            top: 34px;
+            left: 0;
+            width: 180px;
+            border: 1px solid #ccc;
+            box-shadow:0 1px 2px 1px #ccc;
+            padding: 4px;
+          }
+        </style>
+
+        <header class="page-header">
+          <h2>Popup</h2>
+        </header>
+
+        <div class="form-group">
+          <div class="input-group">
+            <input type="text" class="form-control" name="date" placeholder="HH:MM">
+            <div class="container-popup"></div>
+            <span class="input-group-btn">
+              <button type="button" class="btn btn-default show">
+                <i class="glyphicon glyphicon-time"></i>
+              </button>
+            </span>
+          </div>
+        </div>
+
+        <script>
+          document.addEventListener("DOMContentLoaded", function () {
+            var demo = document.getElementById("example-popup");
+            var input = demo.querySelector("input");
+            var button = demo.querySelector("button");
+            var popup = demo.querySelector(".container-popup");
+            var selected = null;
+            var format = 24;
+
+            var timepicker = new Timepicker({
+              container: popup,
+              clock: 24,
+              onChange: function (time) {
+                selected = time;
+                input.value = input.value = formatTime(time, format);
+              }
+            });
+
+            popup.style.display = "none";
+            popup.addEventListener("mousedown", function (e) {
+              e.preventDefault();
+              e.stopPropagation();
+            });
+
+            input.addEventListener("input", function () {
+              var time = formatTime(this.value, format, true);
+              timepicker.setTime(time);
+            });
+
+            button.addEventListener("focus", function () {
+              popup.style.display = "block";
+            });
+
+            button.addEventListener("blur", function () {
+              popup.style.display = "none";
+            });
+          });
+        </script>
+      </section>
     </div>
   </main>
 
