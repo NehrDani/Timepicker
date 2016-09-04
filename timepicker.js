@@ -1,7 +1,7 @@
 /*!
  * Timepicker
  *
- * Copyright © 2016 Daniel Nehring | MIT license | https://github.com/NehrDani/Timepicker
+ * Copyright (c) 2016 Daniel Nehring | MIT license | https://github.com/NehrDani/Timepicker
  */
 
 (function (window, document, undefined) {
@@ -25,10 +25,13 @@
       period: "AM"
     };
 
+    // Timepicker element
     this._timepicker = null;
 
+    // extend configuration
     this._config = extend(defaults, arguments[0]);
 
+    // Initialize Timepicker
     this._init();
   }
 
@@ -40,6 +43,8 @@
     clearTime: clearTime,
     destroy: destroy
   };
+
+  /* public and protected methods */
 
   function setTime (time) {
     return this._setState({
@@ -174,13 +179,17 @@
   }
 
   function init () {
-    this._timepicker = document.createElement("div");
-    this._timepicker.className = "timepicker";
-    this._config.container.appendChild(this._timepicker);
+    this._timepicker = createElement("div", {
+      class: "timepicker"
+    });
+    if (this._config.container)
+      this._config.container.appendChild(this._timepicker);
 
     renderTimepicker.call(this);
     this._render();
   }
+
+  /* private methods */
 
   function renderTimepicker () {
     var row, col, btn;
@@ -202,7 +211,7 @@
       type: "button"
     });
     btn.appendChild(createElement("i", {
-      class: "chevron-up"
+      class: "timepicker-up"
     }));
     btn.addEventListener("click", function () {
       setState({
@@ -228,7 +237,7 @@
       type: "button"
     });
     btn.appendChild(createElement("i", {
-      class: "chevron-up"
+      class: "timepicker-up"
     }));
     btn.addEventListener("click", function () {
       setState({
@@ -330,7 +339,7 @@
       type: "button"
     });
     btn.appendChild(createElement("i", {
-      class: "chevron-down"
+      class: "timepicker-down"
     }));
     btn.addEventListener("click", function () {
       setState({
@@ -356,7 +365,7 @@
       type: "button"
     });
     btn.appendChild(createElement("i", {
-      class: "chevron-down"
+      class: "timepicker-down"
     }));
     btn.addEventListener("click", function () {
       setState({

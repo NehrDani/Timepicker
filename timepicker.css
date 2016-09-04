@@ -31,12 +31,12 @@
   background-color: #eee;
 }
 
-.chevron-up::before {
+.timepicker-up::before {
   content: url("chevron-up.svg");
   position: relative;
   top: 2px;
 }
-.chevron-down::before {
+.timepicker-down::before {
   content: url("chevron-down.svg");
   position: relative;
   top: 2px;
